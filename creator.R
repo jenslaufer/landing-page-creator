@@ -1,21 +1,29 @@
 library(tidyverse)
 library(glue)
 
-resultsPath <- "results"
-dir.create(file.path(resultsPath), showWarnings = F)
+DATA_DIR <- "data"
+RESULT_DIR <- "results"
 
-data <- "template/copies.csv" %>%
-  read_csv() %>%
+
+data <- "{DATA_DIR}/copies.csv" %>%
+  glue() %>%
+  read_csv()
+
+templates <- DATA_DIR %>%
+  list.files(pattern = "\\.html$")
+
+data <- expand_grid(data, template_filename = templates) %>%
+  mutate(template_file = "{DATA_DIR}/{template_filename}" %>%
+           glue()) %>%
   mutate(row = row_number())
 
 
-template <- "template/template.html" %>%
-  read_file() %>%
-  glue()
-
 data %>%
-  pmap(~ with(
+  pmap( ~ with(
     list(...),
-    template %>%
-      glue() %>% write_file("{resultsPath}/{row}.html" %>% glue())
-  ))
+    template_file %>%
+      read_file() %>%
+      glue() %>%
+      glue() %>%
+      write("{RESULT_DIR}/lp{row}.html" %>% glue())
+  )) 
