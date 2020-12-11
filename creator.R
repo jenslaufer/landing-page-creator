@@ -24,6 +24,5 @@ data %>%
     template_file %>%
       read_file() %>%
       glue() %>%
-      glue() %>%
       write("{RESULT_DIR}/lp{row}.html" %>% glue())
   )) 
